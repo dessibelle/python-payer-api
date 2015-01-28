@@ -33,7 +33,7 @@ class PayerPostAPIError(Exception):
 class PayerPostAPI(object):
 
     PAYER_POST_URL = "https://secure.payer.se/PostAPI_V1/InitPayFlow"
-    API_VERSION = "Python_Payer_API_%s" % PYTHON_PAYER_API_VERSION
+    API_VERSION = "Python_Payer_API_%s" % VERSION
 
     def __init__(self, agent_id, key_1, key_2, processing_control, *args, **kwargs):
 
