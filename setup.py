@@ -17,13 +17,13 @@ install_requires = [
 ]
 
 setup(
-    name="payer-api",
+    name="python-payer-api",
     description="Python package for interacting with the Payer payments API (http://www.payer.se).",
     version=VERSION,
     author="Simon Fransson",
     author_email="simon@dessibelle.se",
-    url="https://github.com/dessibelle/payer-api",
-    download_url="https://github.com/dessibelle/payer-api/archive/%s.tar.gz" % VERSION,
+    url="https://github.com/dessibelle/python-payer-api",
+    download_url="https://github.com/dessibelle/python-payer-api/archive/%s.tar.gz" % VERSION,
     packages=['payer_api'],
     install_requires=install_requires,
     classifiers=CLASSIFIERS,
