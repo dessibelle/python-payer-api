@@ -1,3 +1,7 @@
+Python package for interacting with the [Payer](http://payer.se) API.
+
+
+
 Installation
 ============
 
