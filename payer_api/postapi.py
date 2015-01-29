@@ -10,7 +10,6 @@ import hashlib
 from xml import PayerXMLDocument
 import urllib
 import urlparse
-from collections import OrderedDict
 
 
 class PayerPostAPIError(Exception):
@@ -174,18 +173,22 @@ class PayerPostAPI(object):
 
         try:
             url_parts = urlparse.urlparse(url)
-            query = OrderedDict(urlparse.parse_qsl(url_parts.query, keep_blank_values=True))
-            supplied_checksum = query.pop('md5sum')
+            query = dict(urlparse.parse_qsl(url_parts.query, keep_blank_values=True))
+            supplied_checksum = query.pop('md5sum').lower()
 
-            url_parts = url_parts._replace(query=urllib.urlencode(query))
-            stripped_url = urlparse.urlunparse(url_parts)
+            # The fancypants way of building the URL back up with urlunparse/urlencode does not
+            # work as the incoming URL is not urlencoded (i.e. contains raw @ in parameter values).
+            # Instead, we might as well just split the URL at &md5sum which is garuanteed to appear
+            # last in the parameters list.
+
+            stripped_url = url[0:url.rfind('&')]
 
         except:
             raise PayerURLValidationError('Could not extract MD5 checksum from URL %s.' % url)
 
-        expected_checksum = self.get_checksum(stripped_url)
+        expected_checksum = self.get_checksum(stripped_url).lower()
 
-        if not supplied_checksum.lower() == expected_checksum.lower():
+        if supplied_checksum != expected_checksum:
             raise PayerURLValidationError('MD5 checksums did not match. Expected %s, but got %s.' % (expected_checksum, supplied_checksum,))
 
         return True
