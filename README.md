@@ -13,7 +13,7 @@ needed for a successful payment procedure however, is outside the
 scope of this module. Such implementations are encouraged to be
 realized as independent modules, in relation to the frameworks, 
 webshop modules etc. that you may be using. One such example is
-django-shop-payer-backend for which python-payer-api was
+[django-shop-payer-backend](https://github.com/dessibelle/django-shop-payer-backend) for which python-payer-api was
 initially developed.
 
 Installation
