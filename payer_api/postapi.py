@@ -63,7 +63,7 @@ class PayerPostAPI(object):
 
         self.ip_whitelist = kwargs.get('ip_whitelist', IP_WHITELIST)
         self.ip_blacklist = kwargs.get('ip_blacklist', IP_BLACKLIST)
-
+        self.suppress_validation_checks = False
 
     def add_whitelist_ip(self, ip):
         self.ip_whitelist.append(ip)
@@ -155,6 +155,10 @@ class PayerPostAPI(object):
         }
 
     def validate_callback_ip(self, remote_addr):
+
+        if self.suppress_validation_checks:
+            return True
+
         if remote_addr in self.ip_blacklist:
             raise PayerIPBlacklistedException("IP address %s is blacklisted." % remote_addr)
 
@@ -164,6 +168,9 @@ class PayerPostAPI(object):
         return True
 
     def validate_callback_url(self, url):
+
+        if self.suppress_validation_checks:
+            return True
 
         try:
             url_parts = urlparse.urlparse(url)
