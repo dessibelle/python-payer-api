@@ -54,7 +54,10 @@ class PayerOrder(object):
         self.info_lines = kwargs.get('info_lines', [])
 
     def add_order_item(self, order_item):
-        self.order_item.append(order_item)
+        self.order_items.append(order_item)
 
     def add_info_line(self, info_line):
         self.info_lines.append(unicode(info_line))
+
+    def set_buyer_details(self, buyer_details):
+        self.buyer_details = buyer_details

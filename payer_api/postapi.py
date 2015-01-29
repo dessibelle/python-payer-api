@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from . import VERSION
+from . import VERSION, DEBUG_MODE_SILENT
 import base64
 import hashlib
 from xml import PayerXMLDocument
@@ -35,20 +35,22 @@ class PayerPostAPI(object):
     PAYER_POST_URL = "https://secure.payer.se/PostAPI_V1/InitPayFlow"
     API_VERSION = "Python_Payer_API_%s" % VERSION
 
-    def __init__(self, agent_id, key_1, key_2, processing_control, *args, **kwargs):
+    def __init__(self, agent_id, key_1, key_2, *args, **kwargs):
 
         self.agent_id = agent_id
         self.key_1 = key_1
         self.key_2 = key_2
 
-        self.payment_methods = []
         self.encoding = kwargs.get('encoding', "utf-8")
         self.currency = kwargs.get('currency', "SEK")
+
+        self.debug_mode = kwargs.get('debug_mode', DEBUG_MODE_SILENT)
+        self.test_mode = kwargs.get('test_mode', False)
 
         self.xml_document = None
 
         self.set_order(kwargs.get('order', None))
-        self.set_processing_control(processing_control)
+        self.set_processing_control(kwargs.get('processing_control', None))
 
 
     def set_order(self, order):
@@ -96,8 +98,8 @@ class PayerPostAPI(object):
                 agent_id=self.get_agent_id(),
                 order=self.order,
                 processing_control=self.processing_control,
-                debug_mode=PayerXMLDocument.DEBUG_MODE_VERBOSE,
-                test_mode=True,
+                debug_mode=self.debug_mode,
+                test_mode=self.test_mode,
             )
 
     def get_xml_data(self, *args, **kwargs):

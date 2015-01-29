@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+from . import (
+    PAYMENT_METHOD_CARD,
+    PAYMENT_METHOD_BANK,
+    PAYMENT_METHOD_PHONE,
+    PAYMENT_METHOD_INVOICE,
+    DEBUG_MODE_SILENT,
+)
 from lxml import etree as ET
 import urllib
 import urlparse
@@ -7,14 +14,7 @@ import StringIO
 
 class PayerXMLDocument(object):
 
-    DEBUG_MODE_BRIEF = "brief"
-    DEBUG_MODE_SILENT = "silent"
-    DEBUG_MODE_VERBOSE = "verbose"
-
-    PAYMENT_METHOD_CARD = "card"
-
     ROOT_ELEMENT_NAME = "payread_post_api_0_2"
-
     ORDER_ID_URL_PARAMETER_NAME = 'order_id'
 
     def __init__(self, *args, **kwargs):
@@ -23,14 +23,17 @@ class PayerXMLDocument(object):
 
         self.agent_id = kwargs.get('agent_id', None)
 
-        self.debug_mode = kwargs.get('debug_mode', self.DEBUG_MODE_SILENT)
+        self.debug_mode = kwargs.get('debug_mode', DEBUG_MODE_SILENT)
         self.test_mode = bool(kwargs.get('test_mode', False))
 
         self.language = kwargs.get('language', 'sv')
         self.currency = kwargs.get('currency', 'SEK')
 
         self.payment_methods = kwargs.get('payment_methods', [
-            self.PAYMENT_METHOD_CARD,
+            PAYMENT_METHOD_CARD,
+            PAYMENT_METHOD_BANK,
+            PAYMENT_METHOD_PHONE,
+            PAYMENT_METHOD_INVOICE,
         ])
 
         self.order = kwargs.get('order', None)
@@ -59,12 +62,12 @@ class PayerXMLDocument(object):
         buyer_details = ET.SubElement(self.root, 'buyer_details')
         for key, value in self.order.buyer_details.as_dict().iteritems():
             if value:
-                ET.SubElement(buyer_details, key).text = unicode(value.decode('utf-8')) if value else ''
+                ET.SubElement(buyer_details, key).text = unicode(value) if value else ''
 
         # purchase element
         purchase = ET.SubElement(self.root, 'purchase')
-        ET.SubElement(purchase, 'currency').text = self.currency
-        ET.SubElement(purchase, 'description').text = self.order.description
+        ET.SubElement(purchase, 'currency').text = unicode(self.currency)
+        ET.SubElement(purchase, 'description').text = unicode(self.order.description)
 
         purchase_list = ET.SubElement(purchase, 'purchase_list')
 
