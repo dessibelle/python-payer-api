@@ -93,7 +93,7 @@ class PayerXMLDocument(object):
             info_line = ET.SubElement(purchase_list, 'info_line')
 
             ET.SubElement(info_line, 'line_number').text = unicode(3000 + idx)
-            ET.SubElement(info_line, 'text').text = unicode(value.decode('utf-8'))
+            ET.SubElement(info_line, 'text').text = unicode(value[0:255])
 
         # processing_control element
         processing_control = ET.SubElement(self.root, 'processing_control')
