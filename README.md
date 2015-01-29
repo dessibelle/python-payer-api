@@ -1,10 +1,25 @@
-Python package for interacting with the [Payer](http://payer.se) API.
+Python package for interacting with the [Payer](http://payer.se) payments API.
 
+The scope of this module is basically to serialize the data into XML
+ready for transmitting to Payer. Given order details, billing details
+and callback URLs it will build an XML tree, encode it according to
+the Payer specifications and return the encoded data along with the
+required key-value pairs in a dict. Payer expects this data in a
+POST request using an `application/x-www-form-urlencoded` content
+type.
+
+Generating HTML, providing any type of request handlers or views
+needed for a successful payment procedure however, is outside the
+scope of this module. Such implementations are encouraged to be
+realized as independent modules, in relation to the frameworks, 
+webshop modules etc. that you may be using. One such example is
+django-shop-payer-backend for which python-payer-api was
+initially developed.
 
 Installation
 ============
 
-	pip install payer-api
+	pip install python-payer-api
 
 Basic usage
 ===========

@@ -49,7 +49,7 @@ class PayerOrder(object):
 
         self.order_id = unicode(order_id)
         self.buyer_details = kwargs.get('buyer_details', PayerBuyerDetails())
-        self.description = kwargs.get('description', 'Order %s' % self.order_id or '')
+        self.description = kwargs.get('description', 'Order #%s' % self.order_id or '')
         self.order_items = kwargs.get('order_items', [])
         self.info_lines = kwargs.get('info_lines', [])
 

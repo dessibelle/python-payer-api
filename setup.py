@@ -16,6 +16,11 @@ install_requires = [
     'lxml>=3.0',
 ]
 
+import sys
+if sys.version_info.major < 3 and sys.version_info.minor < 7:
+    print "Sorry, this module currently requires Python>=2.7."
+    sys.exit(1)
+
 setup(
     name="python-payer-api",
     description="Python package for interacting with the Payer payments API (http://www.payer.se).",

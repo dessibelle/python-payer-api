@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
-from . import VERSION, DEBUG_MODE_SILENT
+from . import (
+    VERSION, DEBUG_MODE_SILENT, IP_WHITELIST, IP_BLACKLIST,
+    PayerIPNotOnWhitelistException,
+    PayerIPBlacklistedException,
+    PayerURLValidationError,
+)
 import base64
 import hashlib
 from xml import PayerXMLDocument
+import urllib
+import urlparse
+from collections import OrderedDict
 
 
 class PayerPostAPIError(Exception):
@@ -46,12 +54,22 @@ class PayerPostAPI(object):
 
         self.debug_mode = kwargs.get('debug_mode', DEBUG_MODE_SILENT)
         self.test_mode = kwargs.get('test_mode', False)
+        self.payment_methods = kwargs.get('payment_methods', None)
 
         self.xml_document = None
 
         self.set_order(kwargs.get('order', None))
         self.set_processing_control(kwargs.get('processing_control', None))
 
+        self.ip_whitelist = kwargs.get('ip_whitelist', IP_WHITELIST)
+        self.ip_blacklist = kwargs.get('ip_blacklist', IP_BLACKLIST)
+
+
+    def add_whitelist_ip(self, ip):
+        self.ip_whitelist.append(ip)
+
+    def add_blacklist_ip(self, ip):
+        self.ip_blacklist.append(ip)
 
     def set_order(self, order):
         self.order = order
@@ -75,17 +93,14 @@ class PayerPostAPI(object):
     def get_encoding(self):
         return self.encoding
 
-    def get_checksum(self, b64_encoded_xml=None):
-        if not b64_encoded_xml:
-            b64_encoded_xml = get_base64_data()
-
+    def get_checksum(self, data):
         if not self.key_1:
             raise PayerPostAPIError(PayerPostAPIError.ERROR_MISSING_KEY_1)
 
         if not self.key_2:
             raise PayerPostAPIError(PayerPostAPIError.ERROR_MISSING_KEY_2)
 
-        return hashlib.md5(self.key_1 + b64_encoded_xml + self.key_2).hexdigest()
+        return hashlib.md5(self.key_1 + data + self.key_2).hexdigest()
 
     def _generate_xml(self):
 
@@ -94,13 +109,17 @@ class PayerPostAPI(object):
             if not self.agent_id:
                 raise PayerPostAPIError(PayerPostAPIError.ERROR_MISSING_AGENT_ID)
 
-            self.xml_document = PayerXMLDocument(
-                agent_id=self.get_agent_id(),
-                order=self.order,
-                processing_control=self.processing_control,
-                debug_mode=self.debug_mode,
-                test_mode=self.test_mode,
-            )
+            kwargs = {
+                'agent_id': self.get_agent_id(),
+                'order': self.order,
+                'processing_control': self.processing_control,
+                'payment_methods': self.payment_methods,
+                'debug_mode': self.debug_mode,
+                'test_mode': self.test_mode,
+            }
+            kwargs = { k: v for k, v in kwargs.items() if v }
+
+            self.xml_document = PayerXMLDocument(**kwargs)
 
     def get_xml_data(self, *args, **kwargs):
 
@@ -134,3 +153,32 @@ class PayerPostAPI(object):
             'payer_checksum': self.get_checksum(base64_data),
             'payer_charset': self.get_encoding(),
         }
+
+    def validate_callback_ip(self, remote_addr):
+        if remote_addr in self.ip_blacklist:
+            raise PayerIPBlacklistedException("IP address %s is blacklisted." % remote_addr)
+
+        if remote_addr not in self.ip_whitelist:
+            raise PayerIPNotOnWhitelistException("IP address %s is not on the whitelist." % remote_addr)
+
+        return True
+
+    def validate_callback_url(self, url):
+
+        try:
+            url_parts = urlparse.urlparse(url)
+            query = OrderedDict(urlparse.parse_qsl(url_parts.query, keep_blank_values=True))
+            supplied_checksum = query.pop('md5sum')
+
+            url_parts = url_parts._replace(query=urllib.urlencode(query))
+            stripped_url = urlparse.urlunparse(url_parts)
+
+        except:
+            raise PayerURLValidationError('Could not extract MD5 checksum from URL %s.' % url)
+
+        expected_checksum = self.get_checksum(stripped_url)
+
+        if not supplied_checksum.lower() == expected_checksum.lower():
+            raise PayerURLValidationError('MD5 checksums did not match. Expected %s, but got %s.' % (expected_checksum, supplied_checksum,))
+
+        return True

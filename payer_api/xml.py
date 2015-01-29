@@ -26,6 +26,9 @@ class PayerXMLDocument(object):
         self.debug_mode = kwargs.get('debug_mode', DEBUG_MODE_SILENT)
         self.test_mode = bool(kwargs.get('test_mode', False))
 
+        self.message = kwargs.get('message', None)
+        self.hide_details = kwargs.get('hide_details', False)
+
         self.language = kwargs.get('language', 'sv')
         self.currency = kwargs.get('currency', 'SEK')
 
@@ -68,6 +71,10 @@ class PayerXMLDocument(object):
         purchase = ET.SubElement(self.root, 'purchase')
         ET.SubElement(purchase, 'currency').text = unicode(self.currency)
         ET.SubElement(purchase, 'description').text = unicode(self.order.description)
+        ET.SubElement(purchase, 'reference_id').text = unicode(self.order.order_id)
+        if self.message:
+            ET.SubElement(purchase, 'message').text = unicode(self.message)
+        ET.SubElement(purchase, 'hide_details').text = "true" if self.hide_details else "false"
 
         purchase_list = ET.SubElement(purchase, 'purchase_list')
 
@@ -107,7 +114,7 @@ class PayerXMLDocument(object):
                 ET.SubElement(accepted_payment_methods, 'payment_method').text = payment_method
 
     def tostring(self, encoding="utf-8", pretty_print=False, rebuild_tree=False):
-        if not self.root or rebuild_tree:
+        if self.root is None or rebuild_tree:
             self._build_xml_tree()
 
         tree = ET.ElementTree(self.root)
