@@ -103,7 +103,7 @@ The main flow of the payment process is as follows:
 1. You can now call `api.get_post_data()` for a dict of the query parameters Payer expects. Add them as `<input type="hidden">` elements  in a `<form>` element with method `POST` and action `api.get_post_url()` and have the user submit the form (i.e. needs to happen in front-end).
 1. Payer will parse your order, and once the payment has been completed Payer will perform a GET request to your callback URL's - the `authorize_notification_url` URL, and depending on payment method (direct / invoice) call the `settle_notification_url` URL. You will want to implement a view or URL handler that listens on these URL's, for which you call the `validate_callback_ip()` and `validate_callback_url()` methods on PayerPostAPI. A couple of query parameters will be appended to the callback URL's, from which you can extract the Order ID, selected payment method, payment ID etc. The complete list of query paramters are:  
    
-`order_id` , `payer_callback_type`, `payer_testmode`, `payer_payment_type`, `payer_added_fee`, `payer_merchant_reference_id`, `payer_payment_id`, `payread_payment_id`.  
+`order_id`, `payer_callback_type`, `payer_testmode`, `payer_payment_type`, `payer_added_fee`, `payer_merchant_reference_id`, `payer_payment_id`, `payread_payment_id`.  
    
 Depending on the validity of the requests, your view should return either `TRUE` or `FALSE` using a `text/plain` content type.
 1. Once Payer has performed its auth and settle validation it will redirect the user the the `success_redirect_url` URL.

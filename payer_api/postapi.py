@@ -4,38 +4,12 @@ from . import (
     PayerIPNotOnWhitelistException,
     PayerIPBlacklistedException,
     PayerURLValidationError,
+    PayerPostAPIError,
 )
 import base64
 import hashlib
 from xml import PayerXMLDocument
 import urlparse
-
-
-class PayerPostAPIError(Exception):
-
-    ERROR_MISSING_AGENT_ID = 100
-    ERROR_MISSING_KEY_1 = 101
-    ERROR_MISSING_KEY_2 = 102
-    ERROR_MISSING_ORDER = 200
-    ERROR_MISSING_PROCESSING_CONTROL = 300
-    ERROR_XML_ERROR = 400
-
-    ERROR_MESSAGES = {
-        ERROR_MISSING_AGENT_ID: "Agent ID not set.",
-        ERROR_MISSING_KEY_1: "Key 1 not set.",
-        ERROR_MISSING_KEY_2: "Key 2 not set.",
-        ERROR_MISSING_ORDER: "Order not set.",
-        ERROR_MISSING_PROCESSING_CONTROL: "Processing control not set.",
-        ERROR_XML_ERROR: "There was an error while generating XML data.",
-    }
-
-    def __init__(self, code):
-            self.code = code
-
-    def __str__(self):
-        return repr("Error %s: %s" % (
-            self.code,
-            self.ERROR_MESSAGES.get(self.code, "Unknown Error")))
 
 
 class PayerPostAPI(object):
@@ -85,6 +59,10 @@ class PayerPostAPI(object):
         return self.PAYER_POST_URL
 
     def get_agent_id(self):
+        if not self.agent_id:
+            raise PayerPostAPIError(
+                PayerPostAPIError.ERROR_MISSING_AGENT_ID)
+
         return self.agent_id
 
     def get_api_version(self):
@@ -105,10 +83,6 @@ class PayerPostAPI(object):
     def _generate_xml(self):
 
         if self.order and self.processing_control:
-
-            if not self.agent_id:
-                raise PayerPostAPIError(
-                    PayerPostAPIError.ERROR_MISSING_AGENT_ID)
 
             kwargs = {
                 'agent_id': self.get_agent_id(),
@@ -163,11 +137,11 @@ class PayerPostAPI(object):
 
         if remote_addr in self.ip_blacklist:
             raise PayerIPBlacklistedException(
-                "IP address %s is blacklisted." % remote_addr)
+                "IP address %s is blacklisted." % str(remote_addr))
 
         if remote_addr not in self.ip_whitelist:
             raise PayerIPNotOnWhitelistException(
-                "IP address %s is not on the whitelist." % remote_addr)
+                "IP address %s is not on the whitelist." % str(remote_addr))
 
         return True
 
@@ -192,7 +166,7 @@ class PayerPostAPI(object):
 
         except:
             raise PayerURLValidationError(
-                'Could not extract MD5 checksum from URL %s.' % url)
+                'Could not extract MD5 checksum from URL %s.' % str(url))
 
         expected_checksum = self.get_checksum(stripped_url).lower()
 
