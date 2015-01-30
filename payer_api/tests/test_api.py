@@ -16,7 +16,14 @@ from payer_api.order import (
 )
 
 
-class TestPayerPostAPI(unittest.TestCase):
+class TestCase(unittest.TestCase):
+    # Implement assertIsNotNone for Python runtimes < 2.7 or < 3.1
+    if not hasattr(unittest.TestCase, 'assertIsNotNone'):
+        def assertIsNotNone(self, value, *args):
+            self.assertNotEqual(value, None, *args)
+
+
+class TestPayerPostAPI(TestCase):
 
     def setUp(self):
         self.api = PayerPostAPI(
@@ -27,7 +34,6 @@ class TestPayerPostAPI(unittest.TestCase):
 
         self.api.set_processing_control(self.getProcessingControl())
         self.api.set_order(self.getOrder())
-
 
     def getOrder(self):
         return PayerOrder(

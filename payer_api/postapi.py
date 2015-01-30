@@ -92,8 +92,7 @@ class PayerPostAPI(object):
                 'debug_mode': self.debug_mode,
                 'test_mode': self.test_mode,
             }
-            kwargs = {k: v for k, v in kwargs.items() if v}
-
+            kwargs = dict((k, v) for k, v in kwargs.items() if v)
             self.xml_document = PayerXMLDocument(**kwargs)
 
     def get_xml_data(self, *args, **kwargs):
