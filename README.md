@@ -1,3 +1,8 @@
+Python Payer API
+================
+
+[![Build Status](https://travis-ci.org/dessibelle/python-payer-api.svg?branch=master)](https://travis-ci.org/dessibelle/python-payer-api) [![Coverage Status](https://coveralls.io/repos/dessibelle/python-payer-api/badge.svg)](https://coveralls.io/r/dessibelle/python-payer-api) [![Latest Version](https://pypip.in/version/python-payer-api/badge.svg?style=flat)](https://pypi.python.org/pypi/python-payer-api/)
+
 Python package for interacting with the [Payer](http://payer.se) payments API.
 
 The scope of this module is basically to serialize the data into XML
@@ -17,12 +22,12 @@ webshop modules etc. that you may be using. One such example is
 initially developed.
 
 Installation
-============
+------------
 
 	pip install python-payer-api
 
 Basic usage
-===========
+-----------
 
 ```python
 from payer_api import PAYMENT_METHOD_CARD, PAYMENT_METHOD_BANK, PAYMENT_METHOD_PHONE, PAYMENT_METHOD_INVOICE
@@ -87,7 +92,7 @@ print api.get_post_data()
 ```
 
 Payment Process
-===============
+---------------
 
 The main flow of the payment process is as follows:
 
@@ -107,5 +112,3 @@ The main flow of the payment process is as follows:
    
 Depending on the validity of the requests, your view should return either `TRUE` or `FALSE` using a `text/plain` content type.
 1. Once Payer has performed its auth and settle validation it will redirect the user the the `success_redirect_url` URL.
-
-[![Build Status](https://travis-ci.org/dessibelle/python-payer-api.svg?branch=master)](https://travis-ci.org/dessibelle/python-payer-api)
