@@ -2,7 +2,9 @@
 
 class PayerProcessingControl(object):
 
-    def __init__(self, success_redirect_url, authorize_notification_url, settle_notification_url, redirect_back_to_shop_url, *args, **kwargs):
+    def __init__(self, success_redirect_url, authorize_notification_url,
+                 settle_notification_url, redirect_back_to_shop_url,
+                 *args, **kwargs):
         self.success_redirect_url = success_redirect_url
         self.authorize_notification_url = authorize_notification_url
         self.settle_notification_url = settle_notification_url
@@ -11,10 +13,12 @@ class PayerProcessingControl(object):
     def get(self, key, default_value=None):
         return getattr(self, key, default_value)
 
+
 class DictObject(object):
 
     def as_dict(self):
         return self.__dict__
+
 
 class PayerBuyerDetails(DictObject):
 
@@ -34,14 +38,17 @@ class PayerBuyerDetails(DictObject):
         self.orgnr = kwargs.get('orgnr', None)
         self.customer_id = kwargs.get('customer_id', None)
 
+
 class PayerOrderItem(DictObject):
 
-    def __init__(self, description, price_including_vat, vat_percentage, *args, **kwargs):
+    def __init__(self, description, price_including_vat, vat_percentage,
+                 *args, **kwargs):
 
         self.description = unicode(description)
         self.price_including_vat = float(price_including_vat)
         self.vat_percentage = float(vat_percentage)
         self.quantity = int(kwargs.get('quantity', 1))
+
 
 class PayerOrder(object):
 
@@ -49,7 +56,8 @@ class PayerOrder(object):
 
         self.order_id = unicode(order_id)
         self.buyer_details = kwargs.get('buyer_details', PayerBuyerDetails())
-        self.description = kwargs.get('description', 'Order #%s' % self.order_id or '')
+        self.description = kwargs.get('description',
+                                      'Order #%s' % self.order_id or '')
         self.order_items = kwargs.get('order_items', [])
         self.info_lines = kwargs.get('info_lines', [])
 

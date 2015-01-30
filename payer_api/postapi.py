@@ -8,7 +8,6 @@ from . import (
 import base64
 import hashlib
 from xml import PayerXMLDocument
-import urllib
 import urlparse
 
 
@@ -34,7 +33,9 @@ class PayerPostAPIError(Exception):
             self.code = code
 
     def __str__(self):
-        return repr("Error %s: %s" % (self.code, self.ERROR_MESSAGES.get(self.code, "Unknown Error")))
+        return repr("Error %s: %s" % (
+            self.code,
+            self.ERROR_MESSAGES.get(self.code, "Unknown Error")))
 
 
 class PayerPostAPI(object):
@@ -106,7 +107,8 @@ class PayerPostAPI(object):
         if self.order and self.processing_control:
 
             if not self.agent_id:
-                raise PayerPostAPIError(PayerPostAPIError.ERROR_MISSING_AGENT_ID)
+                raise PayerPostAPIError(
+                    PayerPostAPIError.ERROR_MISSING_AGENT_ID)
 
             kwargs = {
                 'agent_id': self.get_agent_id(),
@@ -116,7 +118,7 @@ class PayerPostAPI(object):
                 'debug_mode': self.debug_mode,
                 'test_mode': self.test_mode,
             }
-            kwargs = { k: v for k, v in kwargs.items() if v }
+            kwargs = {k: v for k, v in kwargs.items() if v}
 
             self.xml_document = PayerXMLDocument(**kwargs)
 
@@ -129,7 +131,8 @@ class PayerPostAPI(object):
             raise PayerPostAPIError(PayerPostAPIError.ERROR_MISSING_ORDER)
 
         if not self.processing_control:
-            raise PayerPostAPIError(PayerPostAPIError.ERROR_MISSING_PROCESSING_CONTROL)
+            raise PayerPostAPIError(
+                PayerPostAPIError.ERROR_MISSING_PROCESSING_CONTROL)
 
         if not self.xml_document:
             raise PayerPostAPIError(PayerPostAPIError.ERROR_XML_ERROR)
@@ -159,10 +162,12 @@ class PayerPostAPI(object):
             return True
 
         if remote_addr in self.ip_blacklist:
-            raise PayerIPBlacklistedException("IP address %s is blacklisted." % remote_addr)
+            raise PayerIPBlacklistedException(
+                "IP address %s is blacklisted." % remote_addr)
 
         if remote_addr not in self.ip_whitelist:
-            raise PayerIPNotOnWhitelistException("IP address %s is not on the whitelist." % remote_addr)
+            raise PayerIPNotOnWhitelistException(
+                "IP address %s is not on the whitelist." % remote_addr)
 
         return True
 
@@ -173,22 +178,27 @@ class PayerPostAPI(object):
 
         try:
             url_parts = urlparse.urlparse(url)
-            query = dict(urlparse.parse_qsl(url_parts.query, keep_blank_values=True))
+            query = dict(urlparse.parse_qsl(url_parts.query,
+                         keep_blank_values=True))
             supplied_checksum = query.pop('md5sum').lower()
 
-            # The fancypants way of building the URL back up with urlunparse/urlencode does not
-            # work as the incoming URL is not urlencoded (i.e. contains raw @ in parameter values).
-            # Instead, we might as well just split the URL at &md5sum which is garuanteed to appear
-            # last in the parameters list.
+            # The fancypants way of building the URL back up with
+            # urlunparse/urlencode does not work as the incoming URL is not
+            # urlencoded (i.e. contains raw @ in parameter values). Instead,
+            # we might as well just split the URL at &md5sum which is
+            # garuanteed to appear last in the parameters list.
 
             stripped_url = url[0:url.rfind('&')]
 
         except:
-            raise PayerURLValidationError('Could not extract MD5 checksum from URL %s.' % url)
+            raise PayerURLValidationError(
+                'Could not extract MD5 checksum from URL %s.' % url)
 
         expected_checksum = self.get_checksum(stripped_url).lower()
 
         if supplied_checksum != expected_checksum:
-            raise PayerURLValidationError('MD5 checksums did not match. Expected %s, but got %s.' % (expected_checksum, supplied_checksum,))
+            raise PayerURLValidationError(
+                'MD5 checksums did not match. Expected %s, but got %s.' % (
+                    expected_checksum, supplied_checksum,))
 
         return True

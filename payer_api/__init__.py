@@ -25,8 +25,10 @@ IP_BLACKLIST = []
 class PayerIPNotOnWhitelistException(Exception):
     pass
 
+
 class PayerIPBlacklistedException(Exception):
     pass
+
 
 class PayerURLValidationError(Exception):
     pass
