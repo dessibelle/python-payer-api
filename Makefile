@@ -4,8 +4,7 @@ flake8:
 	flake8 --ignore=W999 payer_api
 
 test:
-	python -m unittest discover
-	# python payer_api/tests/runtests.py
+	python payer_api/tests/runtests.py
 
 coverage:
 	coverage erase
