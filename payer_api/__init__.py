@@ -1,4 +1,4 @@
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 
 DEBUG_MODE_BRIEF = "brief"
 DEBUG_MODE_SILENT = "silent"

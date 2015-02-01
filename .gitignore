@@ -13,3 +13,4 @@ lib64
 .tox
 htmlcov
 .coverage
+MANIFEST
