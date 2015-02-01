@@ -1,6 +1,5 @@
 from distutils.core import setup
 
-
 VERSION = __import__("payer_api").VERSION
 
 CLASSIFIERS = [
@@ -14,10 +13,17 @@ install_requires = [
     'lxml>=3.0',
 ]
 
+try:
+    from pypandoc import convert
+    read_md = lambda f: convert(f, 'rst')
+except ImportError:
+    read_md = lambda f: open(f, 'r').read()
+
 setup(
     name="python-payer-api",
     description="Python package for interacting with the Payer payments API\
         (http://www.payer.se).",
+    long_description=read_md("README.md"),
     version=VERSION,
     author="Simon Fransson",
     author_email="simon@dessibelle.se",
