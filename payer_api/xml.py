@@ -42,10 +42,14 @@ class PayerXMLDocument(object):
         self.order = kwargs.get('order', None)
 
         processing_control = kwargs.get('processing_control', kwargs)
-        self.success_redirect_url = processing_control.get('success_redirect_url', None)
-        self.authorize_notification_url = processing_control.get('authorize_notification_url', None)
-        self.settle_notification_url = processing_control.get('settle_notification_url', None)
-        self.redirect_back_to_shop_url = processing_control.get('redirect_back_to_shop_url', None)
+        self.success_redirect_url = \
+            processing_control.get('success_redirect_url', None)
+        self.authorize_notification_url = \
+            processing_control.get('authorize_notification_url', None)
+        self.settle_notification_url = \
+            processing_control.get('settle_notification_url', None)
+        self.redirect_back_to_shop_url = \
+            processing_control.get('redirect_back_to_shop_url', None)
 
         super(PayerXMLDocument, self).__init__()
 
@@ -54,40 +58,50 @@ class PayerXMLDocument(object):
         self.root = ET.Element(self.ROOT_ELEMENT_NAME, nsmap={
             'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
         }, attrib={
-            '{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation': 'payread_post_api_0_2.xsd',
+            "{http://www.w3.org/2001/XMLSchema-instance}"
+            "noNamespaceSchemaLocation": 'payread_post_api_0_2.xsd',
         })
 
         # seller_details element
         seller_details = ET.SubElement(self.root, 'seller_details')
         ET.SubElement(seller_details, 'agent_id').text = self.agent_id
 
-
         buyer_details = ET.SubElement(self.root, 'buyer_details')
         for key, value in self.order.buyer_details.as_dict().iteritems():
             if value:
-                ET.SubElement(buyer_details, key).text = unicode(value) if value else ''
+                ET.SubElement(buyer_details, key).text = \
+                    unicode(value) if value else ''
 
         # purchase element
         purchase = ET.SubElement(self.root, 'purchase')
         ET.SubElement(purchase, 'currency').text = unicode(self.currency)
-        ET.SubElement(purchase, 'description').text = unicode(self.order.description)
-        ET.SubElement(purchase, 'reference_id').text = unicode(self.order.order_id)
+        ET.SubElement(purchase, 'description').text = \
+            unicode(self.order.description)
+        ET.SubElement(purchase, 'reference_id').text = \
+            unicode(self.order.order_id)
         if self.message:
             ET.SubElement(purchase, 'message').text = unicode(self.message)
-        ET.SubElement(purchase, 'hide_details').text = "true" if self.hide_details else "false"
+        ET.SubElement(purchase, 'hide_details').text = \
+            "true" if self.hide_details else "false"
 
         purchase_list = ET.SubElement(purchase, 'purchase_list')
 
         for idx, item in enumerate(self.order.order_items):
-            freeform_purchase = ET.SubElement(purchase_list, 'freeform_purchase')
+            freeform_purchase = ET.SubElement(
+                purchase_list, 'freeform_purchase')
 
-            item_data = item.as_dict()
+            data = item.as_dict()
 
-            ET.SubElement(freeform_purchase, 'line_number').text = unicode(idx + 1)
-            ET.SubElement(freeform_purchase, 'description').text = unicode(item_data.get('description', 'Product'))
-            ET.SubElement(freeform_purchase, 'price_including_vat').text = unicode("%.2f" % float(item_data.get('price_including_vat', 0)))
-            ET.SubElement(freeform_purchase, 'vat_percentage').text = unicode("%.2f" % float(item_data.get('vat_percentage', 25)))
-            ET.SubElement(freeform_purchase, 'quantity').text = unicode(item_data.get('quantity', 1))
+            ET.SubElement(freeform_purchase, 'line_number').text = \
+                unicode(idx + 1)
+            ET.SubElement(freeform_purchase, 'description').text = \
+                unicode(data.get('description', 'Product'))
+            ET.SubElement(freeform_purchase, 'price_including_vat').text = \
+                unicode("%.2f" % float(data.get('price_including_vat', 0)))
+            ET.SubElement(freeform_purchase, 'vat_percentage').text = \
+                unicode("%.2f" % float(data.get('vat_percentage', 25)))
+            ET.SubElement(freeform_purchase, 'quantity').text = \
+                unicode(data.get('quantity', 1))
 
         for idx, value in enumerate(self.order.info_lines):
             info_line = ET.SubElement(purchase_list, 'info_line')
@@ -97,29 +111,39 @@ class PayerXMLDocument(object):
 
         # processing_control element
         processing_control = ET.SubElement(self.root, 'processing_control')
-        ET.SubElement(processing_control, 'success_redirect_url').text = self.get_success_redirect_url()
-        ET.SubElement(processing_control, 'authorize_notification_url').text = self.get_authorize_notification_url(self.order.order_id)
-        ET.SubElement(processing_control, 'settle_notification_url').text = self.get_settle_notification_url(self.order.order_id)
-        ET.SubElement(processing_control, 'redirect_back_to_shop_url').text = self.get_redirect_back_to_shop_url()
+        ET.SubElement(processing_control, 'success_redirect_url').text = \
+            self.get_success_redirect_url()
+        ET.SubElement(processing_control, 'authorize_notification_url').text = \
+            self.get_authorize_notification_url(self.order.order_id)
+        ET.SubElement(processing_control, 'settle_notification_url').text = \
+            self.get_settle_notification_url(self.order.order_id)
+        ET.SubElement(processing_control, 'redirect_back_to_shop_url').text = \
+            self.get_redirect_back_to_shop_url()
 
         # database_overrides element
         database_overrides = ET.SubElement(self.root, 'database_overrides')
         ET.SubElement(database_overrides, 'debug_mode').text = self.debug_mode
-        ET.SubElement(database_overrides, 'test_mode').text = "true" if self.test_mode else "false"
-        ET.SubElement(database_overrides, 'language').text = self.language.lower()
+        ET.SubElement(database_overrides, 'test_mode').text = \
+            "true" if self.test_mode else "false"
+        ET.SubElement(database_overrides, 'language').text = \
+            self.language.lower()
 
         if len(self.payment_methods):
-            accepted_payment_methods = ET.SubElement(database_overrides, 'accepted_payment_methods')
+            payment_methods = ET.SubElement(
+                database_overrides, 'accepted_payment_methods')
             for payment_method in self.payment_methods:
-                ET.SubElement(accepted_payment_methods, 'payment_method').text = payment_method
+                ET.SubElement(payment_methods, 'payment_method').text = \
+                    payment_method
 
-    def tostring(self, encoding="utf-8", pretty_print=False, rebuild_tree=False):
+    def tostring(self, encoding="utf-8", pretty_print=False,
+                 rebuild_tree=False):
         if self.root is None or rebuild_tree:
             self._build_xml_tree()
 
         tree = ET.ElementTree(self.root)
         output = StringIO.StringIO()
-        tree.write(output, pretty_print=pretty_print, xml_declaration=True, encoding=encoding, method="xml")
+        tree.write(output, pretty_print=pretty_print, xml_declaration=True,
+                   encoding=encoding, method="xml")
 
         retval = output.getvalue()
         output.close()
@@ -143,10 +167,18 @@ class PayerXMLDocument(object):
         return self.success_redirect_url
 
     def get_authorize_notification_url(self, order_id=None):
-        return self._add_params_to_url(self.authorize_notification_url, params={ self.ORDER_ID_URL_PARAMETER_NAME: order_id or '' })
+        return self._add_params_to_url(self.authorize_notification_url,
+                                       params={
+                                           self.ORDER_ID_URL_PARAMETER_NAME:
+                                           order_id or ''
+                                       })
 
     def get_settle_notification_url(self, order_id=None):
-        return self._add_params_to_url(self.settle_notification_url, params={ self.ORDER_ID_URL_PARAMETER_NAME: order_id or '' })
+        return self._add_params_to_url(self.settle_notification_url,
+                                       params={
+                                           self.ORDER_ID_URL_PARAMETER_NAME:
+                                           order_id or ''
+                                       })
 
     def get_redirect_back_to_shop_url(self):
         return self.redirect_back_to_shop_url
