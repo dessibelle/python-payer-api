@@ -16,7 +16,3 @@ after_success: coveralls
 cache:
   directories:
     - pip_cache
-branches:
-  only:
-    - develop
-    - master
