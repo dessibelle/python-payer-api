@@ -41,15 +41,15 @@ class PayerXMLDocument(object):
 
         self.order = kwargs.get('order', None)
 
-        processing_control = kwargs.get('processing_control', kwargs)
+        processing_ctrl = kwargs.get('processing_control', kwargs)
         self.success_redirect_url = \
-            processing_control.get('success_redirect_url', None)
+            processing_ctrl.get('success_redirect_url', None)
         self.authorize_notification_url = \
-            processing_control.get('authorize_notification_url', None)
+            processing_ctrl.get('authorize_notification_url', None)
         self.settle_notification_url = \
-            processing_control.get('settle_notification_url', None)
+            processing_ctrl.get('settle_notification_url', None)
         self.redirect_back_to_shop_url = \
-            processing_control.get('redirect_back_to_shop_url', None)
+            processing_ctrl.get('redirect_back_to_shop_url', None)
 
         super(PayerXMLDocument, self).__init__()
 
@@ -79,7 +79,7 @@ class PayerXMLDocument(object):
             unicode(self.order.description)
         ET.SubElement(purchase, 'reference_id').text = \
             unicode(self.order.order_id)
-        if self.message:
+        if self.message is not None:
             ET.SubElement(purchase, 'message').text = unicode(self.message)
         ET.SubElement(purchase, 'hide_details').text = \
             "true" if self.hide_details else "false"
@@ -110,14 +110,14 @@ class PayerXMLDocument(object):
             ET.SubElement(info_line, 'text').text = unicode(value[0:255])
 
         # processing_control element
-        processing_control = ET.SubElement(self.root, 'processing_control')
-        ET.SubElement(processing_control, 'success_redirect_url').text = \
+        processing_ctrl = ET.SubElement(self.root, 'processing_control')
+        ET.SubElement(processing_ctrl, 'success_redirect_url').text = \
             self.get_success_redirect_url()
-        ET.SubElement(processing_control, 'authorize_notification_url').text = \
+        ET.SubElement(processing_ctrl, 'authorize_notification_url').text = \
             self.get_authorize_notification_url(self.order.order_id)
-        ET.SubElement(processing_control, 'settle_notification_url').text = \
+        ET.SubElement(processing_ctrl, 'settle_notification_url').text = \
             self.get_settle_notification_url(self.order.order_id)
-        ET.SubElement(processing_control, 'redirect_back_to_shop_url').text = \
+        ET.SubElement(processing_ctrl, 'redirect_back_to_shop_url').text = \
             self.get_redirect_back_to_shop_url()
 
         # database_overrides element
@@ -156,7 +156,7 @@ class PayerXMLDocument(object):
     @classmethod
     def _add_params_to_url(cls, url, params={}):
         url_parts = list(urlparse.urlparse(url))
-        query = dict(urlparse.parse_qsl(url_parts[4]))
+        query = dict(urlparse.parse_qsl(url_parts[4], keep_blank_values=True))
         query.update(params)
 
         url_parts[4] = urllib.urlencode(query)

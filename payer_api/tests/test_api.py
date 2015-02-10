@@ -1,4 +1,5 @@
 import unittest
+from payer_api.tests import TestCase
 import hashlib
 import base64
 from payer_api import (
@@ -14,13 +15,6 @@ from payer_api.order import (
     PayerBuyerDetails,
     PayerOrderItem,
 )
-
-
-class TestCase(unittest.TestCase):
-    # Implement assertIsNotNone for Python runtimes < 2.7 or < 3.1
-    if not hasattr(unittest.TestCase, 'assertIsNotNone'):
-        def assertIsNotNone(self, value, *args):
-            self.assertNotEqual(value, None, *args)
 
 
 class TestPayerPostAPI(TestCase):
@@ -75,16 +69,28 @@ class TestPayerPostAPI(TestCase):
             redirect_back_to_shop_url="http://localhost/webshop/",
         )
 
+    def test_settings(self):
+        self.assertEqual(self.api.get_post_url(), self.api.PAYER_POST_URL)
+        self.assertEqual(
+            self.api.get_post_url(),
+            "https://secure.payer.se/PostAPI_V1/InitPayFlow")
+
     def test_checksums(self):
+
+        def check_checksums(xml_data, b64_data):
+            checksum = self.api.get_checksum(b64_data)
+            expected_checksum = hashlib.md5(
+                "6866ef97a972ba3a2c6ff8bb2812981054770162" +
+                base64.b64encode(xml_data) +
+                "1388ac756f07b0dda2961436ba8596c7b7995e94").hexdigest()
+
+            self.assertEqual(checksum, expected_checksum)
+
         xml_data = self.api.get_xml_data()
+        b64_data = self.api.get_base64_data()
 
-        checksum = self.api.get_checksum(self.api.get_base64_data())
-        expected_checksum = hashlib.md5(
-            "6866ef97a972ba3a2c6ff8bb2812981054770162" +
-            base64.b64encode(xml_data) +
-            "1388ac756f07b0dda2961436ba8596c7b7995e94").hexdigest()
-
-        self.assertEqual(checksum, expected_checksum)
+        check_checksums(xml_data, b64_data)
+        check_checksums("foo bar", self.api.get_base64_data("foo bar"))
 
     def test_callback_validation(self):
         xml = self.api.xml_document
@@ -140,6 +146,10 @@ class TestPayerPostAPI(TestCase):
         self.assertTrue(self.api.validate_callback_url(settle_url_test))
         self.assertTrue(self.api.validate_callback_url(settle_url_api))
 
+        self.api.suppress_validation_checks = True
+        self.assertTrue(self.api.validate_callback_url("fake url"))
+        self.api.suppress_validation_checks = False
+
         self.assertEqual(auth_url_test, auth_url_api)
         self.assertEqual(settle_url_test, settle_url_api)
 
@@ -158,6 +168,12 @@ class TestPayerPostAPI(TestCase):
                           (self.api, settle_url +
                            "&md5sum=79acb36d5a10837c377e6f3f1cf9fc9c"))
 
+        try:
+            self.api.validate_callback_url(
+                settle_url + "&md5sum=79acb36d5a10837c377e6f3f1cf9fc9c")
+        except PayerURLValidationError as e:
+            self.assertTrue(str(e).startswith("MD5 checksums did not match."))
+
         # IP white/blacklists
         for ip in self.api.ip_whitelist:
             self.assertTrue(self.api.validate_callback_ip(ip))
@@ -167,6 +183,10 @@ class TestPayerPostAPI(TestCase):
         self.assertRaises(PayerIPNotOnWhitelistException,
                           self.api.validate_callback_ip,
                           new_ip)
+
+        self.api.suppress_validation_checks = True
+        self.assertTrue(self.api.validate_callback_ip("fake ip"))
+        self.api.suppress_validation_checks = False
 
         self.api.add_whitelist_ip(new_ip)
         self.assertTrue(self.api.validate_callback_ip(new_ip))
@@ -198,6 +218,15 @@ class TestPayerPostAPI(TestCase):
         except:
             raised = True
 
+        try:
+            api.get_post_data()
+        except PayerPostAPIError as e:
+            self.assertEqual(
+                e.code,
+                PayerPostAPIError.ERROR_MISSING_ORDER)
+
+        api.set_order(self.getOrder())
+
         self.assertFalse(raised, 'Exception raised')
         self.assertIsNotNone(api.get_checksum("data"))
 
@@ -205,9 +234,20 @@ class TestPayerPostAPI(TestCase):
         self.assertRaises(PayerPostAPIError,
                           api.get_post_data)
 
-        api.agent_id = "AGENT_ID"
+        try:
+            api.get_post_data()
+        except PayerPostAPIError as e:
+            self.assertEqual(
+                e.code,
+                PayerPostAPIError.ERROR_MISSING_PROCESSING_CONTROL)
 
-        api.set_order(self.getOrder())
+            self.assertEqual(
+                str(e),
+                repr("Error %s: %s" % (
+                    e.code,
+                    e.ERROR_MESSAGES.get(e.code, "Unknown Error"))))
+
+        api.agent_id = "AGENT_ID"
         api.set_processing_control(self.getProcessingControl())
 
         raised = False
@@ -221,6 +261,14 @@ class TestPayerPostAPI(TestCase):
         self.assertRaises(PayerPostAPIError,
                           api._generate_xml)
 
+    def test_xml_error(self):
+        data = self.api.get_xml_data()
+        assert data
+
+        self.api.xml_document = "Fake XML document"
+
+        self.assertRaises(PayerPostAPIError,
+                          self.api.get_xml_data)
 
 if __name__ == '__main__':
     unittest.main()

@@ -107,10 +107,13 @@ class PayerPostAPI(object):
             raise PayerPostAPIError(
                 PayerPostAPIError.ERROR_MISSING_PROCESSING_CONTROL)
 
-        if not self.xml_document:
+        xml_data = None
+        try:
+            xml_data = self.xml_document.tostring(*args, **kwargs)
+        except:
             raise PayerPostAPIError(PayerPostAPIError.ERROR_XML_ERROR)
 
-        return self.xml_document.tostring(*args, **kwargs)
+        return xml_data
 
     def get_base64_data(self, xml_data=None, *args, **kwargs):
         if not xml_data:

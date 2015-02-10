@@ -2,6 +2,8 @@ import unittest
 
 testmodules = [
     'payer_api.tests.test_api',
+    'payer_api.tests.test_xml',
+    'payer_api.tests.test_order',
 ]
 
 suite = unittest.TestSuite()
