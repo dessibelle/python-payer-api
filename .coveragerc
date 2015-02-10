@@ -1,5 +1,6 @@
 [run]
 source = payer_api
+omit = payer_api/tests/*
 branch = 1
 
 [report]
