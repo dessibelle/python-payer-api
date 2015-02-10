@@ -156,7 +156,7 @@ class PayerXMLDocument(object):
     @classmethod
     def _add_params_to_url(cls, url, params={}):
         url_parts = list(urlparse.urlparse(url))
-        query = dict(urlparse.parse_qsl(url_parts[4]))
+        query = dict(urlparse.parse_qsl(url_parts[4], keep_blank_values=True))
         query.update(params)
 
         url_parts[4] = urllib.urlencode(query)
