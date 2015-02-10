@@ -1,7 +1,7 @@
 Python Payer API
 ================
 
-[![Build Status](https://travis-ci.org/dessibelle/python-payer-api.svg?branch=master)](https://travis-ci.org/dessibelle/python-payer-api) [![Coverage Status](https://coveralls.io/repos/dessibelle/python-payer-api/badge.svg)](https://coveralls.io/r/dessibelle/python-payer-api) [![Latest Version](https://pypip.in/version/python-payer-api/badge.svg?style=flat)](https://pypi.python.org/pypi/python-payer-api/)
+[![Build Status](https://travis-ci.org/dessibelle/python-payer-api.svg?branch=master)](https://travis-ci.org/dessibelle/python-payer-api) [![Coverage Status](https://coveralls.io/repos/dessibelle/python-payer-api/badge.svg?branch=master)](https://coveralls.io/r/dessibelle/python-payer-api?branch=master) [![Latest Version](https://pypip.in/version/python-payer-api/badge.svg?style=flat)](https://pypi.python.org/pypi/python-payer-api/)
 
 Python package for interacting with the [Payer](http://payer.se) payments API.
 
