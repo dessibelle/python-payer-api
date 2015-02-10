@@ -79,7 +79,7 @@ class PayerXMLDocument(object):
             unicode(self.order.description)
         ET.SubElement(purchase, 'reference_id').text = \
             unicode(self.order.order_id)
-        if self.message:
+        if self.message is not None:
             ET.SubElement(purchase, 'message').text = unicode(self.message)
         ET.SubElement(purchase, 'hide_details').text = \
             "true" if self.hide_details else "false"
