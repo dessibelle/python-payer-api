@@ -30,7 +30,12 @@ Basic usage
 -----------
 
 ```python
-from payer_api import PAYMENT_METHOD_CARD, PAYMENT_METHOD_BANK, PAYMENT_METHOD_PHONE, PAYMENT_METHOD_INVOICE
+from payer_api import (
+    PAYMENT_METHOD_CARD,
+    PAYMENT_METHOD_BANK,
+    PAYMENT_METHOD_PHONE,
+    PAYMENT_METHOD_INVOICE,
+)
 from payer_api.postapi import PayerPostAPI
 from payer_api.order import (
     PayerProcessingControl,
@@ -43,7 +48,12 @@ api = PayerPostAPI(
     agent_id="AGENT_ID",
     key_1="6866ef97a972ba3a2c6ff8bb2812981054770162",
     key_2="1388ac756f07b0dda2961436ba8596c7b7995e94",
-    payment_methods=[PAYMENT_METHOD_CARD, PAYMENT_METHOD_BANK, PAYMENT_METHOD_PHONE, PAYMENT_METHOD_INVOICE]
+    payment_methods=[
+        PAYMENT_METHOD_CARD,
+        PAYMENT_METHOD_BANK,
+        PAYMENT_METHOD_PHONE,
+        PAYMENT_METHOD_INVOICE,
+    ]
 )
 
 
