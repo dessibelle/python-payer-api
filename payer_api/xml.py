@@ -149,7 +149,7 @@ class PayerXMLDocument(object):
         tree.write(output, pretty_print=pretty_print, xml_declaration=True,
                    encoding=encoding, method="xml")
 
-        retval = output.getvalue().decode('utf-8')
+        retval = output.getvalue().decode(encoding)
         output.close()
 
         return retval

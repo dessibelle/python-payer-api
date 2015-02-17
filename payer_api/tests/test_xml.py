@@ -195,6 +195,7 @@ class XMLTestCase(TestCase):
 
     def test_xml(self):
         xml = self.xml_document.tostring()
+        self.assertEqual(str(self.xml_document), xml)
 
         try:
             parser = etree.XMLParser(dtd_validation=False)
