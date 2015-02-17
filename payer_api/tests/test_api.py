@@ -78,14 +78,15 @@ class TestPayerPostAPI(TestCase):
 
     def test_checksums(self):
 
-        def check_checksums(xml_data, b64_data):
-            checksum = self.api.get_checksum(b64_data)
-            expected_checksum = hashlib.md5(
-                "6866ef97a972ba3a2c6ff8bb2812981054770162" +
-                base64.b64encode(xml_data) +
-                "1388ac756f07b0dda2961436ba8596c7b7995e94").hexdigest()
+        def check_checksums(xml, b64_data):
+            checksum = self.api.get_checksum(b64_data.decode('utf-8'))
 
-            self.assertEqual(checksum, expected_checksum)
+            data = "6866ef97a972ba3a2c6ff8bb2812981054770162" + \
+                   base64.b64encode(xml.encode('utf-8')).decode('utf-8') + \
+                   "1388ac756f07b0dda2961436ba8596c7b7995e94"
+
+            expected_checksum = hashlib.md5(data.encode('utf-8')).hexdigest()
+            self.assertEqual(expected_checksum, checksum)
 
         xml_data = self.api.get_xml_data()
         b64_data = self.api.get_base64_data()
@@ -96,10 +97,11 @@ class TestPayerPostAPI(TestCase):
         checksum = self.api.get_checksum("Shrimp sandwich")
         self.assertEqual("46b4c1ae6b8529a93d39b3f8b821ae9d", checksum)
 
-        checksum = self.api.get_checksum("Räksmörgås")
+        checksum = self.api.get_checksum('R\xe4ksm\xf6rg\xe5s')
         self.assertEqual("89e526a8d65ddb803b952c93c6a6c10a", checksum)
 
-        checksum = self.api.get_checksum(base64.b64encode("Räksmörgås"))
+        b64_data = base64.b64encode('R\xe4ksm\xf6rg\xe5s'.encode("utf-8"))
+        checksum = self.api.get_checksum(b64_data.decode("utf-8"))
         self.assertEqual("ed4e18a2088e023ba637dc47108b93bd", checksum)
 
     def test_callback_validation(self):
@@ -129,17 +131,19 @@ class TestPayerPostAPI(TestCase):
         # be erroneously encoded, e.g. enecoded @ characters in query string
 
         def add_query_params(url, params):
-            qsl = ["%s=%s" % (k, v,) for k, v in params.iteritems()]
+            qsl = ["%s=%s" % (k, v,) for k, v in params.items()]
             return "&".join([url] + qsl)
 
         auth_url = add_query_params(auth_url, ad)
         settle_url = add_query_params(settle_url, sd)
 
         def get_md5_sum(url):
-            return hashlib.md5(
-                "6866ef97a972ba3a2c6ff8bb2812981054770162" +
-                url +
-                "1388ac756f07b0dda2961436ba8596c7b7995e94").hexdigest()
+
+            data = "6866ef97a972ba3a2c6ff8bb2812981054770162" + \
+                   url + \
+                   "1388ac756f07b0dda2961436ba8596c7b7995e94"
+
+            return hashlib.md5(data.encode('utf-8')).hexdigest()
 
         auth_url_test = "%s&md5sum=%s" % (
             auth_url, get_md5_sum(auth_url))

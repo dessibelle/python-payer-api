@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from . import (
     PAYMENT_METHOD_CARD,
     PAYMENT_METHOD_BANK,
@@ -7,9 +8,12 @@ from . import (
     DEBUG_MODE_SILENT,
 )
 from lxml import etree as ET
-import urllib
-import urlparse
-import StringIO
+from io import BytesIO
+try:  # NOQA
+    from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode  # NOQA
+except:  # NOQA
+    from urlparse import urlparse, parse_qsl, urlunparse  # NOQA
+    from urllib import urlencode  # NOQA
 
 
 class PayerXMLDocument(object):
@@ -67,20 +71,20 @@ class PayerXMLDocument(object):
         ET.SubElement(seller_details, 'agent_id').text = self.agent_id
 
         buyer_details = ET.SubElement(self.root, 'buyer_details')
-        for key, value in self.order.buyer_details.as_dict().iteritems():
+        for key, value in self.order.buyer_details.as_dict().items():
             if value:
                 ET.SubElement(buyer_details, key).text = \
-                    unicode(value) if value else ''
+                    str(value) if value else ''
 
         # purchase element
         purchase = ET.SubElement(self.root, 'purchase')
-        ET.SubElement(purchase, 'currency').text = unicode(self.currency)
+        ET.SubElement(purchase, 'currency').text = str(self.currency)
         ET.SubElement(purchase, 'description').text = \
-            unicode(self.order.description)
+            str(self.order.description)
         ET.SubElement(purchase, 'reference_id').text = \
-            unicode(self.order.order_id)
+            str(self.order.order_id)
         if self.message is not None:
-            ET.SubElement(purchase, 'message').text = unicode(self.message)
+            ET.SubElement(purchase, 'message').text = str(self.message)
         ET.SubElement(purchase, 'hide_details').text = \
             "true" if self.hide_details else "false"
 
@@ -93,21 +97,21 @@ class PayerXMLDocument(object):
             data = item.as_dict()
 
             ET.SubElement(freeform_purchase, 'line_number').text = \
-                unicode(idx + 1)
+                str(idx + 1)
             ET.SubElement(freeform_purchase, 'description').text = \
-                unicode(data.get('description', 'Product'))
+                str(data.get('description', 'Product'))
             ET.SubElement(freeform_purchase, 'price_including_vat').text = \
-                unicode("%.2f" % float(data.get('price_including_vat', 0)))
+                str("%.2f" % float(data.get('price_including_vat', 0)))
             ET.SubElement(freeform_purchase, 'vat_percentage').text = \
-                unicode("%.2f" % float(data.get('vat_percentage', 25)))
+                str("%.2f" % float(data.get('vat_percentage', 25)))
             ET.SubElement(freeform_purchase, 'quantity').text = \
-                unicode(data.get('quantity', 1))
+                str(data.get('quantity', 1))
 
         for idx, value in enumerate(self.order.info_lines):
             info_line = ET.SubElement(purchase_list, 'info_line')
 
-            ET.SubElement(info_line, 'line_number').text = unicode(3000 + idx)
-            ET.SubElement(info_line, 'text').text = unicode(value[0:255])
+            ET.SubElement(info_line, 'line_number').text = str(3000 + idx)
+            ET.SubElement(info_line, 'text').text = str(value[0:255])
 
         # processing_control element
         processing_ctrl = ET.SubElement(self.root, 'processing_control')
@@ -141,11 +145,11 @@ class PayerXMLDocument(object):
             self._build_xml_tree()
 
         tree = ET.ElementTree(self.root)
-        output = StringIO.StringIO()
+        output = BytesIO()
         tree.write(output, pretty_print=pretty_print, xml_declaration=True,
                    encoding=encoding, method="xml")
 
-        retval = output.getvalue()
+        retval = output.getvalue().decode(encoding)
         output.close()
 
         return retval
@@ -155,13 +159,13 @@ class PayerXMLDocument(object):
 
     @classmethod
     def _add_params_to_url(cls, url, params={}):
-        url_parts = list(urlparse.urlparse(url))
-        query = dict(urlparse.parse_qsl(url_parts[4], keep_blank_values=True))
+        url_parts = list(urlparse(url))
+        query = dict(parse_qsl(url_parts[4], keep_blank_values=True))
         query.update(params)
 
-        url_parts[4] = urllib.urlencode(query)
+        url_parts[4] = urlencode(query)
 
-        return urlparse.urlunparse(url_parts)
+        return urlunparse(url_parts)
 
     def get_success_redirect_url(self):
         return self.success_redirect_url

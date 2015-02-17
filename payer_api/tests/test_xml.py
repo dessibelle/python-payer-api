@@ -1,5 +1,5 @@
+from __future__ import unicode_literals
 import unittest
-import urlparse
 from payer_api.tests import TestCase
 from payer_api.xml import PayerXMLDocument
 from payer_api.order import (
@@ -18,6 +18,10 @@ from payer_api import (
     PAYMENT_METHOD_INVOICE,
 )
 from lxml import etree
+try:  # NOQA
+    from urllib.parse import urlparse, parse_qsl  # NOQA
+except:  # NOQA
+    from urlparse import urlparse, parse_qsl  # NOQA
 
 
 class XMLTestCase(TestCase):
@@ -160,8 +164,8 @@ class XMLTestCase(TestCase):
                 'empty': '',
             })
 
-        url_parts = list(urlparse.urlparse(url))
-        params = dict(urlparse.parse_qsl(url_parts[4], keep_blank_values=True))
+        url_parts = list(urlparse(url))
+        params = dict(parse_qsl(url_parts[4], keep_blank_values=True))
 
         self.assertEqual(
             set(params.keys()),
@@ -174,8 +178,8 @@ class XMLTestCase(TestCase):
                 'empty': '',
             })
 
-        url_parts = list(urlparse.urlparse(url))
-        params = dict(urlparse.parse_qsl(url_parts[4], keep_blank_values=True))
+        url_parts = list(urlparse(url))
+        params = dict(parse_qsl(url_parts[4], keep_blank_values=True))
 
         self.assertEqual(
             set(params.keys()),
@@ -191,11 +195,11 @@ class XMLTestCase(TestCase):
 
     def test_xml(self):
         xml = self.xml_document.tostring()
-        self.assertEqual(xml, str(self.xml_document))
+        self.assertEqual(str(self.xml_document), xml)
 
         try:
             parser = etree.XMLParser(dtd_validation=False)
-            root = etree.fromstring(xml, parser)
+            root = etree.fromstring(xml.encode('utf-8'), parser)
             if root is None:
                 raise Exception("No XML data")
         except Exception as e:
@@ -203,19 +207,20 @@ class XMLTestCase(TestCase):
 
         def missing_dtd():
             parser = etree.XMLParser(dtd_validation=True)
-            root = etree.fromstring(xml, parser)
+            root = etree.fromstring(xml.encode('utf-8'), parser)
             assert root
 
         def malformed_xml():
             parser = etree.XMLParser(dtd_validation=False)
-            root = etree.fromstring(xml + "malformed xml", parser)
+            root = etree.fromstring(xml.encode('utf-8') +
+                                    b"malformed xml", parser)
             assert root
 
         self.assertRaises(etree.XMLSyntaxError, missing_dtd)
         self.assertRaises(etree.XMLSyntaxError, malformed_xml)
 
         xml = self.xml_document.tostring()
-        root = etree.fromstring(xml)
+        root = etree.fromstring(xml.encode('utf-8'))
 
         currency = root.xpath("/payread_post_api_0_2/purchase/currency/text()")
         self.assertEqual(currency[0], 'SEK')
@@ -225,7 +230,7 @@ class XMLTestCase(TestCase):
 
         self.xml_document.message = "Foo bar"
         xml = self.xml_document.tostring(rebuild_tree=True)
-        root = etree.fromstring(xml)
+        root = etree.fromstring(xml.encode('utf-8'))
 
         message = root.xpath("/payread_post_api_0_2/purchase/message/text()")
         self.assertEqual(message[0], "Foo bar")
@@ -239,7 +244,7 @@ class XMLTestCase(TestCase):
 
         self.xml_document.payment_methods = []
         xml = self.xml_document.tostring(rebuild_tree=True)
-        root = etree.fromstring(xml)
+        root = etree.fromstring(xml.encode('utf-8'))
         payment_methods = root.xpath(
             "/payread_post_api_0_2/database_overrides" +
             "/accepted_payment_methods")
