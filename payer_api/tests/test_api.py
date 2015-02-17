@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 from payer_api.tests import TestCase
 import hashlib
@@ -91,6 +92,15 @@ class TestPayerPostAPI(TestCase):
 
         check_checksums(xml_data, b64_data)
         check_checksums("foo bar", self.api.get_base64_data("foo bar"))
+
+        checksum = self.api.get_checksum("Shrimp sandwich")
+        self.assertEqual("46b4c1ae6b8529a93d39b3f8b821ae9d", checksum)
+
+        checksum = self.api.get_checksum("Räksmörgås")
+        self.assertEqual("89e526a8d65ddb803b952c93c6a6c10a", checksum)
+
+        checksum = self.api.get_checksum(base64.b64encode("Räksmörgås"))
+        self.assertEqual("ed4e18a2088e023ba637dc47108b93bd", checksum)
 
     def test_callback_validation(self):
         xml = self.api.xml_document
