@@ -8,8 +8,11 @@ from . import (
 )
 import base64
 import hashlib
-from xml import PayerXMLDocument
-import urlparse
+from .xml import PayerXMLDocument
+try:  # NOQA
+    from urllib.parse import urlparse, parse_qsl  # NOQA
+except:  # NOQA
+    from urlparse import urlparse, parse_qsl  # NOQA
 
 
 class PayerPostAPI(object):
@@ -78,7 +81,10 @@ class PayerPostAPI(object):
         if not self.key_2:
             raise PayerPostAPIError(PayerPostAPIError.ERROR_MISSING_KEY_2)
 
-        return hashlib.md5(self.key_1 + data + self.key_2).hexdigest()
+        data = self.key_1 + data + self.key_2
+        data = data.encode(self.encoding)
+
+        return hashlib.md5(data).hexdigest()
 
     def _generate_xml(self):
 
@@ -119,10 +125,10 @@ class PayerPostAPI(object):
         if not xml_data:
             xml_data = self.get_xml_data(*args, **kwargs)
 
-        return base64.b64encode(xml_data)
+        return base64.b64encode(xml_data.encode(self.encoding))
 
     def get_post_data(self):
-        base64_data = self.get_base64_data()
+        base64_data = self.get_base64_data().decode(self.encoding)
 
         return {
             'payer_agentid': self.get_agent_id(),
@@ -153,8 +159,8 @@ class PayerPostAPI(object):
             return True
 
         try:
-            url_parts = urlparse.urlparse(url)
-            query = dict(urlparse.parse_qsl(url_parts.query,
+            url_parts = urlparse(url)
+            query = dict(parse_qsl(url_parts.query,
                          keep_blank_values=True))
             supplied_checksum = query.pop('md5sum').lower()
 

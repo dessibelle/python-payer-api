@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 
 
 class PayerProcessingControl(object):
@@ -44,7 +45,7 @@ class PayerOrderItem(DictObject):
     def __init__(self, description, price_including_vat, vat_percentage,
                  *args, **kwargs):
 
-        self.description = unicode(description)
+        self.description = str(description)
         self.price_including_vat = float(price_including_vat)
         self.vat_percentage = float(vat_percentage)
         self.quantity = int(kwargs.get('quantity', 1))
@@ -54,7 +55,7 @@ class PayerOrder(object):
 
     def __init__(self, order_id, *args, **kwargs):
 
-        self.order_id = unicode(order_id)
+        self.order_id = str(order_id)
         self.buyer_details = kwargs.get('buyer_details', PayerBuyerDetails())
         self.description = kwargs.get('description',
                                       'Order #%s' % self.order_id or '')
@@ -65,7 +66,7 @@ class PayerOrder(object):
         self.order_items.append(order_item)
 
     def add_info_line(self, info_line):
-        self.info_lines.append(unicode(info_line))
+        self.info_lines.append(str(info_line))
 
     def set_buyer_details(self, buyer_details):
         self.buyer_details = buyer_details
