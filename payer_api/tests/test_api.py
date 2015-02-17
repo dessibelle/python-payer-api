@@ -78,11 +78,11 @@ class TestPayerPostAPI(TestCase):
 
     def test_checksums(self):
 
-        def check_checksums(xml_data, b64_data):
+        def check_checksums(xml, b64_data):
             checksum = self.api.get_checksum(b64_data.decode('utf-8'))
 
             data = "6866ef97a972ba3a2c6ff8bb2812981054770162" + \
-                   base64.b64encode(xml_data.encode('utf-8')).decode('utf-8') + \
+                   base64.b64encode(xml.encode('utf-8')).decode('utf-8') + \
                    "1388ac756f07b0dda2961436ba8596c7b7995e94"
 
             expected_checksum = hashlib.md5(data.encode('utf-8')).hexdigest()
