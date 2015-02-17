@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.3
+* Added Python 3 support
+
 ## 0.1.2
 * Bugfix for URL parsing when query string has blank values
 * Minor improvements and stability
