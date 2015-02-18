@@ -8,7 +8,6 @@ from . import (
     DEBUG_MODE_SILENT,
 )
 from lxml import etree as ET
-from io import BytesIO
 import six
 try:  # NOQA
     from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode  # NOQA

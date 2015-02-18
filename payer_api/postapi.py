@@ -9,7 +9,6 @@ from . import (
 )
 import base64
 import hashlib
-import six
 from .xml import PayerXMLDocument
 try:  # NOQA
     from urllib.parse import urlparse, parse_qsl  # NOQA
