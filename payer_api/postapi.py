@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 from . import (
     VERSION, DEBUG_MODE_SILENT, IP_WHITELIST, IP_BLACKLIST,
     PayerIPNotOnWhitelistException,
@@ -8,6 +9,7 @@ from . import (
 )
 import base64
 import hashlib
+import six
 from .xml import PayerXMLDocument
 try:  # NOQA
     from urllib.parse import urlparse, parse_qsl  # NOQA
@@ -81,7 +83,12 @@ class PayerPostAPI(object):
         if not self.key_2:
             raise PayerPostAPIError(PayerPostAPIError.ERROR_MISSING_KEY_2)
 
+        # if type(data) != str:
+        #     print(type(data))
+        #     data = data.encode(self.encoding)
+
         data = self.key_1 + data + self.key_2
+
         data = data.encode(self.encoding)
 
         return hashlib.md5(data).hexdigest()

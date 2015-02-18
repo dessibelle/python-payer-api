@@ -17,6 +17,7 @@ CLASSIFIERS = [
 
 install_requires = [
     'lxml>=3.0',
+    'six',
 ]
 
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import unittest
 from payer_api.tests import TestCase
@@ -42,13 +43,13 @@ class XMLTestCase(TestCase):
         return PayerOrder(
             order_id="123456",
             buyer_details=PayerBuyerDetails(
-                first_name="John",
-                last_name="Doe",
-                address_line_1="1234 Main Street",
+                first_name="Jürg",
+                last_name="Bäcker",
+                address_line_1="Bundesstraße 123",
                 postal_code="12345",
-                city="Anywhere",
+                city="Düsseldorf",
                 phone_mobile="012345678",
-                email="john.doe@host.com",
+                email="jb@host.com",
             ),
             order_items=[
                 PayerOrderItem(
@@ -195,7 +196,14 @@ class XMLTestCase(TestCase):
 
     def test_xml(self):
         xml = self.xml_document.tostring()
-        self.assertEqual(str(self.xml_document), xml)
+        xml_string = str(self.xml_document)
+
+        import six
+
+        if six.PY2:
+            self.assertEqual(xml, xml_string.decode('utf-8'))
+        elif six.PY3:
+            self.assertEqual(xml, xml_string)
 
         try:
             parser = etree.XMLParser(dtd_validation=False)

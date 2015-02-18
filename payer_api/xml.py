@@ -9,6 +9,7 @@ from . import (
 )
 from lxml import etree as ET
 from io import BytesIO
+import six
 try:  # NOQA
     from urllib.parse import urlparse, parse_qsl, urlunparse, urlencode  # NOQA
 except:  # NOQA
@@ -16,6 +17,7 @@ except:  # NOQA
     from urllib import urlencode  # NOQA
 
 
+@six.python_2_unicode_compatible
 class PayerXMLDocument(object):
 
     ROOT_ELEMENT_NAME = "payread_post_api_0_2"
@@ -74,17 +76,17 @@ class PayerXMLDocument(object):
         for key, value in self.order.buyer_details.as_dict().items():
             if value:
                 ET.SubElement(buyer_details, key).text = \
-                    str(value) if value else ''
+                    value if value else ''
 
         # purchase element
         purchase = ET.SubElement(self.root, 'purchase')
-        ET.SubElement(purchase, 'currency').text = str(self.currency)
+        ET.SubElement(purchase, 'currency').text = self.currency
         ET.SubElement(purchase, 'description').text = \
-            str(self.order.description)
+            self.order.description
         ET.SubElement(purchase, 'reference_id').text = \
-            str(self.order.order_id)
+            self.order.order_id
         if self.message is not None:
-            ET.SubElement(purchase, 'message').text = str(self.message)
+            ET.SubElement(purchase, 'message').text = self.message
         ET.SubElement(purchase, 'hide_details').text = \
             "true" if self.hide_details else "false"
 
@@ -99,11 +101,11 @@ class PayerXMLDocument(object):
             ET.SubElement(freeform_purchase, 'line_number').text = \
                 str(idx + 1)
             ET.SubElement(freeform_purchase, 'description').text = \
-                str(data.get('description', 'Product'))
+                data.get('description', 'Product')
             ET.SubElement(freeform_purchase, 'price_including_vat').text = \
-                str("%.2f" % float(data.get('price_including_vat', 0)))
+                "%.2f" % float(data.get('price_including_vat', 0))
             ET.SubElement(freeform_purchase, 'vat_percentage').text = \
-                str("%.2f" % float(data.get('vat_percentage', 25)))
+                "%.2f" % float(data.get('vat_percentage', 25))
             ET.SubElement(freeform_purchase, 'quantity').text = \
                 str(data.get('quantity', 1))
 
@@ -145,7 +147,7 @@ class PayerXMLDocument(object):
             self._build_xml_tree()
 
         tree = ET.ElementTree(self.root)
-        output = BytesIO()
+        output = six.BytesIO()
         tree.write(output, pretty_print=pretty_print, xml_declaration=True,
                    encoding=encoding, method="xml")
 

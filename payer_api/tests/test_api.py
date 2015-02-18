@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import unittest
 from payer_api.tests import TestCase
 import hashlib
@@ -97,10 +98,10 @@ class TestPayerPostAPI(TestCase):
         checksum = self.api.get_checksum("Shrimp sandwich")
         self.assertEqual("46b4c1ae6b8529a93d39b3f8b821ae9d", checksum)
 
-        checksum = self.api.get_checksum('R\xe4ksm\xf6rg\xe5s')
+        checksum = self.api.get_checksum("Räksmörgås")
         self.assertEqual("89e526a8d65ddb803b952c93c6a6c10a", checksum)
 
-        b64_data = base64.b64encode('R\xe4ksm\xf6rg\xe5s'.encode("utf-8"))
+        b64_data = base64.b64encode("Räksmörgås".encode('utf-8'))
         checksum = self.api.get_checksum(b64_data.decode("utf-8"))
         self.assertEqual("ed4e18a2088e023ba637dc47108b93bd", checksum)
 
